@@ -117,4 +117,32 @@ describe('ExpenseService', () => {
     });
     expect(expense.syncStatus).toBe('pending');
   });
+
+  it('soft-deletes an existing expense and marks it pending', async () => {
+    const existing: any = {
+      id: 'expense-1',
+      familyId: 'family-1',
+      userId: 'user-1',
+      categoryId: 'category-1',
+      paymentMethodId: 'pm-1',
+      amount: 10,
+      expenseDate: '2026-09-02',
+      createdAt: '2026-09-02T00:00:00.000Z',
+      updatedAt: '2026-09-02T00:00:00.000Z',
+      syncStatus: 'synced',
+    };
+
+    getById.mockResolvedValue(existing);
+    update.mockResolvedValue(undefined);
+
+    user.set({ id: 'user-1' });
+    familyId = 'family-1';
+
+    await service.deleteExpense('expense-1');
+
+    expect(update).toHaveBeenCalled();
+    const called = update.mock.calls[0][0];
+    expect(called.deletedAt).toBe('2026-09-02T12:00:00.000Z');
+    expect(called.syncStatus).toBe('pending');
+  });
 });

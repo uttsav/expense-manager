@@ -14,8 +14,11 @@ export class ExpenseRepository {
     this.savedExpenseCount.update((count) => count + 1);
   }
 
-  async update(expense: Expense): Promise<void> {
+  async update(expense: Expense, notify = true): Promise<void> {
     await expenseDb.expenses.put(expense);
+    if (notify) {
+      this.savedExpenseCount.update((count) => count + 1);
+    }
   }
 
   async getById(id: string): Promise<Expense | undefined> {

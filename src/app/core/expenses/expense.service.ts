@@ -91,6 +91,21 @@ export class ExpenseService {
   }
 
   async deleteExpense(id: string): Promise<void> {
-    await this.expenseRepository.delete(id);
+    const existingExpense = await this.getExpenseById(id);
+
+    if (!existingExpense) {
+      throw new Error('Expense not found.');
+    }
+
+    const now = new Date().toISOString();
+
+    const expense: Expense = {
+      ...existingExpense,
+      deletedAt: now,
+      updatedAt: now,
+      syncStatus: 'pending',
+    };
+
+    await this.expenseRepository.update(expense);
   }
 }
