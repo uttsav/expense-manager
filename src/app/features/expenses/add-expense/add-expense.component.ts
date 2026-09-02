@@ -122,6 +122,10 @@ export class AddExpenseComponent {
     }
   }
 
+  async cancel(): Promise<void> {
+    await this.router.navigate(['/dashboard']);
+  }
+
   private async loadCategories(): Promise<void> {
     try {
       this.categories.set(await this.categoryService.getCategories());

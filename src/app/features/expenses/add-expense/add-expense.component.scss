@@ -21,6 +21,30 @@
   border-radius: 16px;
 }
 
+.top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px -8px 20px;
+}
+
+.cancel-button {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #555;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid #777;
+    outline-offset: 2px;
+  }
+}
+
 .brand {
   display: flex;
   align-items: center;

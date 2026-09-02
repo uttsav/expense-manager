@@ -73,6 +73,19 @@ describe('AddExpenseComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('cancels and navigates to the dashboard without saving', async () => {
+    await createComponent();
+
+    const cancelButton = fixture.nativeElement.querySelector(
+      '.cancel-button',
+    ) as HTMLButtonElement;
+    cancelButton.click();
+    await Promise.resolve();
+
+    expect(navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(addExpense).not.toHaveBeenCalled();
+  });
+
   it('does not submit an invalid form', async () => {
     await createComponent();
 
