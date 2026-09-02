@@ -35,6 +35,14 @@ export const routes: Routes = [
   },
 
   {
+    path: 'expenses/add',
+    canActivate: [familyGuard],
+    loadComponent: () =>
+      import('./features/expenses/add-expense/add-expense.component')
+        .then((m) => m.AddExpenseComponent),
+  },
+
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',

@@ -1,0 +1,165 @@
+<main class="expense-page">
+  <section class="expense-card" aria-labelledby="add-expense-heading">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">₹</span>
+      <div>
+        <p class="brand-name">Family Expenses</p>
+        <p class="brand-tagline">Quickly add a household expense</p>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h1 id="add-expense-heading">Add expense</h1>
+      <p>Saved on this device first, then synced when available.</p>
+    </div>
+
+    <form (ngSubmit)="submit()" novalidate>
+      <div class="field amount-field">
+        <label for="amount">Amount</label>
+        <div class="amount-input">
+          <span aria-hidden="true">₹</span>
+          <input
+            #amountInput
+            id="amount"
+            name="amount"
+            type="number"
+            inputmode="decimal"
+            min="0.01"
+            step="0.01"
+            placeholder="0.00"
+            autocomplete="off"
+            required
+            [ngModel]="amount()"
+            (ngModelChange)="amount.set($event === '' ? null : +$event)"
+            [attr.aria-invalid]="hasAmountError()"
+            aria-describedby="amount-error"
+          />
+        </div>
+        @if (hasAmountError()) {
+          <p id="amount-error" class="field-error">Enter an amount greater than zero.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="category">Category</label>
+        <select
+          id="category"
+          name="category"
+          [ngModel]="categoryId()"
+          (ngModelChange)="categoryId.set($event)"
+          required
+          [disabled]="categoriesLoading() || !categories().length"
+          [attr.aria-invalid]="hasCategoryError()"
+          aria-describedby="category-error category-status"
+        >
+          <option value="">
+            @if (categoriesLoading()) {
+              Loading categories…
+            } @else if (!categories().length) {
+              No categories available
+            } @else {
+              Choose a category
+            }
+          </option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+        @if (categoriesLoading()) {
+          <p id="category-status" class="field-hint">Loading categories…</p>
+        } @else if (!categories().length) {
+          <p id="category-status" class="field-hint">No active categories are available.</p>
+        }
+        @if (hasCategoryError()) {
+          <p id="category-error" class="field-error">Choose a category.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="payment-method">Payment method</label>
+        <select
+          id="payment-method"
+          name="paymentMethod"
+          [ngModel]="paymentMethodId()"
+          (ngModelChange)="paymentMethodId.set($event)"
+          required
+          [disabled]="paymentMethodsLoading() || !paymentMethods().length"
+          [attr.aria-invalid]="hasPaymentMethodError()"
+          aria-describedby="payment-method-error payment-method-status"
+        >
+          <option value="">
+            @if (paymentMethodsLoading()) {
+              Loading payment methods…
+            } @else if (!paymentMethods().length) {
+              No payment methods available
+            } @else {
+              Choose a payment method
+            }
+          </option>
+          @for (paymentMethod of paymentMethods(); track paymentMethod.id) {
+            <option [value]="paymentMethod.id">{{ paymentMethod.name }}</option>
+          }
+        </select>
+        @if (paymentMethodsLoading()) {
+          <p id="payment-method-status" class="field-hint">Loading payment methods…</p>
+        } @else if (!paymentMethods().length) {
+          <p id="payment-method-status" class="field-hint">No active payment methods are available.</p>
+        }
+        @if (hasPaymentMethodError()) {
+          <p id="payment-method-error" class="field-error">Choose a payment method.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="expense-date">Expense date</label>
+        <input
+          id="expense-date"
+          name="expenseDate"
+          type="date"
+          required
+          [ngModel]="expenseDate()"
+          (ngModelChange)="expenseDate.set($event)"
+          [attr.aria-invalid]="hasExpenseDateError()"
+          aria-describedby="expense-date-error"
+        />
+        @if (hasExpenseDateError()) {
+          <p id="expense-date-error" class="field-error">Choose an expense date.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="note">Note <span>(optional)</span></label>
+        <textarea
+          id="note"
+          name="note"
+          rows="2"
+          maxlength="250"
+          placeholder="What was this for?"
+          [ngModel]="note()"
+          (ngModelChange)="note.set($event)"
+        ></textarea>
+      </div>
+
+      @if (lookupError()) {
+        <p class="message error" role="alert">{{ lookupError() }}</p>
+      }
+
+      @if (saveError()) {
+        <p class="message error" role="alert">{{ saveError() }}</p>
+      }
+
+      @if (successMessage()) {
+        <p class="message success" role="status">{{ successMessage() }}</p>
+      }
+
+      <button
+        type="submit"
+        class="save-button"
+        [disabled]="saving()"
+        aria-label="Save expense"
+      >
+        {{ saving() ? 'Saving expense…' : 'Save expense' }}
+      </button>
+    </form>
+  </section>
+</main>
