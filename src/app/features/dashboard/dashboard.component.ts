@@ -131,15 +131,30 @@ export class DashboardComponent {
   }
 
   protected formatExpenseDate(expenseDate: string): string {
-    const [year, month, day] = expenseDate.split('-').map(Number);
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(expenseDate);
+
+    if (!match) {
+      return expenseDate;
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+
     const date = new Date(year, month - 1, day);
 
-    return new Intl.DateTimeFormat(undefined, {
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return expenseDate;
+    }
+
+    return new Intl.DateTimeFormat('en-GB', {
       day: 'numeric',
       month: 'short',
-      year: date.getFullYear() === new Date().getFullYear()
-        ? undefined
-        : 'numeric',
+      year: 'numeric',
     }).format(date);
   }
 
