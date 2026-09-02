@@ -1,14 +1,18 @@
 :host {
   display: block;
+  width: 100%;
 }
 
 .expense-page {
+  box-sizing: border-box;
+  width: 100%;
   min-height: 100svh;
   padding: 16px;
   background: #f7f7f5;
 }
 
 .expense-card {
+  box-sizing: border-box;
   width: min(100%, 460px);
   margin: 0 auto;
   padding: 24px;
