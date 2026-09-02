@@ -15,14 +15,20 @@ export class AuthService {
   readonly session = signal<Session | null>(null);
   readonly loading = signal(true);
 
+  private readonly initialization: Promise<void>;
+
   constructor(
     private readonly supabaseService: SupabaseService,
   ) {
-    void this.initialize();
+    this.initialization = this.initialize();
   }
 
   private get supabase() {
     return this.supabaseService.client;
+  }
+
+  async waitUntilReady(): Promise<void> {
+    await this.initialization;
   }
 
   private async initialize(): Promise<void> {

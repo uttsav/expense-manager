@@ -1,24 +1,3 @@
-export type ExpenseCategory =
-  | 'Food'
-  | 'Grocery'
-  | 'Baby Shopping'
-  | 'Transport'
-  | 'Home'
-  | 'Bills'
-  | 'Shopping'
-  | 'Health'
-  | 'Entertainment'
-  | 'Travel'
-  | 'Education'
-  | 'Other';
-
-export type PaymentMethod =
-  | 'UPI'
-  | 'Cash'
-  | 'Credit Card'
-  | 'Debit Card'
-  | 'Bank Transfer';
-
 export type ExpenseSyncStatus =
   | 'pending'
   | 'synced'
@@ -31,11 +10,11 @@ export interface Expense {
 
   userId: string;
 
+  categoryId: string;
+
+  paymentMethodId: string;
+
   amount: number;
-
-  category: ExpenseCategory;
-
-  paymentMethod: PaymentMethod;
 
   note?: string;
 

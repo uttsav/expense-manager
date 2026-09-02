@@ -11,6 +11,10 @@ export class ExpenseDatabase extends Dexie {
     this.version(1).stores({
       expenses: 'id, familyId, userId, expenseDate, syncStatus, updatedAt',
     });
+
+    this.version(2).stores({
+      expenses: 'id, familyId, userId, categoryId, paymentMethodId, expenseDate, syncStatus, updatedAt, deletedAt',
+    });
   }
 }
 

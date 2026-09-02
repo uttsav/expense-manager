@@ -1,0 +1,61 @@
+<main class="auth-page">
+  <section class="auth-card">
+    <div class="brand">
+      <span class="brand-icon">₹</span>
+      <div>
+        <h1>Family Expenses</h1>
+        <p>Manage your family spending</p>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h2>Welcome back</h2>
+      <p>Sign in to continue</p>
+    </div>
+
+    <form (ngSubmit)="submit()">
+      <label for="email">Email</label>
+
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        placeholder="you@example.com"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        required
+      />
+
+      <label for="password">Password</label>
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Your password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        required
+      />
+
+      @if (errorMessage()) {
+        <p class="error">{{ errorMessage() }}</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        @if (loading()) {
+          Signing in...
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+
+    <p class="switch-auth">
+      Don't have an account?
+      <a routerLink="/auth/signup">Create one</a>
+    </p>
+  </section>
+</main>

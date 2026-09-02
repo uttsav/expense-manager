@@ -1,0 +1,66 @@
+<main class="setup-page">
+  <section class="setup-card">
+    <div class="brand">
+      <div class="brand-icon">₹</div>
+
+      <div>
+        <div class="brand-name">Family Expenses</div>
+        <div class="brand-tagline">
+          Manage your family spending
+        </div>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h1>Set up your family</h1>
+
+      <p>
+        Create your family space to start tracking expenses
+        together.
+      </p>
+    </div>
+
+    <form (ngSubmit)="submit()">
+      <div class="field">
+        <label for="familyName">Family name</label>
+
+        <input
+          id="familyName"
+          name="familyName"
+          type="text"
+          placeholder="e.g. Our Family"
+          [ngModel]="familyName()"
+          (ngModelChange)="familyName.set($event)"
+          autocomplete="organization"
+        />
+      </div>
+
+      <div class="field">
+        <label for="memberName">Your name</label>
+
+        <input
+          id="memberName"
+          name="memberName"
+          type="text"
+          placeholder="e.g. Tyler"
+          [ngModel]="memberName()"
+          (ngModelChange)="memberName.set($event)"
+          autocomplete="name"
+        />
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+      >
+        {{ loading() ? 'Creating family…' : 'Create family' }}
+      </button>
+    </form>
+  </section>
+</main>

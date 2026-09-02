@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 import { expenseDb } from './expense-db';
 import { Expense } from '../../shared/models/expense.model';
@@ -7,8 +7,11 @@ import { Expense } from '../../shared/models/expense.model';
   providedIn: 'root',
 })
 export class ExpenseRepository {
+  readonly savedExpenseCount = signal(0);
+
   async add(expense: Expense): Promise<void> {
     await expenseDb.expenses.add(expense);
+    this.savedExpenseCount.update((count) => count + 1);
   }
 
   async update(expense: Expense): Promise<void> {

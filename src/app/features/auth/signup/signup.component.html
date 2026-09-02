@@ -1,0 +1,78 @@
+<main class="auth-page">
+  <section class="auth-card">
+    <div class="brand">
+      <span class="brand-icon">₹</span>
+      <div>
+        <h1>Family Expenses</h1>
+        <p>Manage your family spending</p>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h2>Create account</h2>
+      <p>Start managing your family expenses</p>
+    </div>
+
+    <form (ngSubmit)="submit()">
+      <label for="email">Email</label>
+
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        placeholder="you@example.com"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        required
+      />
+
+      <label for="password">Password</label>
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        placeholder="At least 6 characters"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        required
+      />
+
+      <label for="confirm-password">Confirm password</label>
+
+      <input
+        id="confirm-password"
+        name="confirm-password"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Enter password again"
+        [ngModel]="confirmPassword()"
+        (ngModelChange)="confirmPassword.set($event)"
+        required
+      />
+
+      @if (errorMessage()) {
+        <p class="error">{{ errorMessage() }}</p>
+      }
+
+      @if (successMessage()) {
+        <p class="success">{{ successMessage() }}</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        @if (loading()) {
+          Creating account...
+        } @else {
+          Create account
+        }
+      </button>
+    </form>
+
+    <p class="switch-auth">
+      Already have an account?
+      <a routerLink="/auth/login">Sign in</a>
+    </p>
+  </section>
+</main>
