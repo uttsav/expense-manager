@@ -28,8 +28,24 @@ export class PaymentMethodService {
   private readonly family = inject(FamilyService);
   private readonly supabase = inject(SupabaseService);
 
+  private cachedFamilyId: string | null = null;
+  private cachedUserId: string | null = null;
+  private cachedPaymentMethods: PaymentMethod[] | null = null;
+  private inFlightRequest: Promise<PaymentMethod[]> | null = null;
+
+  private clearCache() {
+    this.cachedFamilyId = null;
+    this.cachedUserId = null;
+    this.cachedPaymentMethods = null;
+    this.inFlightRequest = null;
+  }
+
   async getPaymentMethods(): Promise<PaymentMethod[]> {
-    if (!this.auth.user()) {
+    const user = this.auth.user();
+
+    // If not authenticated, ensure cache is cleared and return empty
+    if (!user) {
+      this.clearCache();
       return [];
     }
 
@@ -39,23 +55,59 @@ export class PaymentMethodService {
       return [];
     }
 
-    const { data, error } = await this.supabase.client
-      .from('payment_methods')
-      .select('id, family_id, name, is_active, sort_order')
-      .eq('family_id', familyId)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      throw error;
+    // If cached for same family and same user, return cache
+    if (
+      this.cachedFamilyId === familyId &&
+      this.cachedUserId === user.id &&
+      this.cachedPaymentMethods
+    ) {
+      return this.cachedPaymentMethods;
     }
 
-    return ((data ?? []) as PaymentMethodRow[]).map((paymentMethod) => ({
-      id: paymentMethod.id,
-      familyId: paymentMethod.family_id,
-      name: paymentMethod.name,
-      isActive: paymentMethod.is_active,
-      sortOrder: paymentMethod.sort_order,
-    }));
+    // If an in-flight request exists for the same family & user, reuse it
+    if (
+      this.cachedFamilyId === familyId &&
+      this.cachedUserId === user.id &&
+      this.inFlightRequest
+    ) {
+      return this.inFlightRequest;
+    }
+
+    // Family or user changed: clear previous cache and start new fetch
+    this.clearCache();
+    this.cachedFamilyId = familyId;
+    this.cachedUserId = user.id;
+
+    this.inFlightRequest = (async () => {
+      try {
+        const { data, error } = await this.supabase.client
+          .from('payment_methods')
+          .select('id, family_id, name, is_active, sort_order')
+          .eq('family_id', familyId)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        const mapped = ((data ?? []) as PaymentMethodRow[]).map((paymentMethod) => ({
+          id: paymentMethod.id,
+          familyId: paymentMethod.family_id,
+          name: paymentMethod.name,
+          isActive: paymentMethod.is_active,
+          sortOrder: paymentMethod.sort_order,
+        }));
+
+        this.cachedPaymentMethods = mapped;
+
+        return mapped;
+      } finally {
+        // allow subsequent requests to read cachedPaymentMethods
+        this.inFlightRequest = null;
+      }
+    })();
+
+    return this.inFlightRequest;
   }
 }
