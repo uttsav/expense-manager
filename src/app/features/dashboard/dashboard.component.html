@@ -1,0 +1,93 @@
+<main class="dashboard-page">
+  <section class="dashboard-shell" aria-labelledby="dashboard-heading">
+    <header class="dashboard-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">₹</span>
+        <div>
+          <p class="brand-name">Family Expenses</p>
+          <p class="brand-greeting">Hello, {{ memberName() }}</p>
+        </div>
+      </div>
+
+      <button type="button" class="sign-out" (click)="signOut()" aria-label="Sign out">
+        Sign out
+      </button>
+    </header>
+
+    @if (loading()) {
+      <section class="loading-state" aria-live="polite">
+        <p>Loading your expenses…</p>
+      </section>
+    } @else if (errorMessage()) {
+      <section class="error-state" role="alert">
+        <h1 id="dashboard-heading">Unable to load expenses</h1>
+        <p>{{ errorMessage() }}</p>
+        <button type="button" (click)="retry()">Try again</button>
+      </section>
+    } @else {
+      <section class="summary" aria-labelledby="dashboard-heading">
+        <p class="eyebrow">{{ monthHeading }}</p>
+        <h1 id="dashboard-heading">Your spending</h1>
+        <p class="monthly-total">₹{{ monthTotal() | number: '1.0-2' }}</p>
+        <p class="monthly-label">spent this month</p>
+
+        <div class="summary-cards" aria-label="Spending summary">
+          <article class="summary-card primary">
+            <span>This month</span>
+            <strong>₹{{ monthTotal() | number: '1.0-2' }}</strong>
+          </article>
+          <article class="summary-card">
+            <span>This week</span>
+            <strong>₹{{ weekTotal() | number: '1.0-2' }}</strong>
+          </article>
+          <article class="summary-card">
+            <span>Today</span>
+            <strong>₹{{ todayTotal() | number: '1.0-2' }}</strong>
+          </article>
+        </div>
+      </section>
+
+      @if (lookupError()) {
+        <p class="lookup-note" role="status">{{ lookupError() }}</p>
+      }
+
+      <section class="recent-section" aria-labelledby="recent-expenses-heading">
+        <div class="section-heading">
+          <h2 id="recent-expenses-heading">Recent expenses</h2>
+          <span>{{ recentExpenses().length }} of {{ expenses().length }}</span>
+        </div>
+
+        @if (!expenses().length) {
+          <div class="empty-state">
+            <div class="empty-icon" aria-hidden="true">+</div>
+            <h3>No expenses yet</h3>
+            <p>Add your first household expense to start seeing your spending here.</p>
+            <button type="button" (click)="goToAddExpense()">Add your first expense</button>
+          </div>
+        } @else {
+          <ol class="expense-list">
+            @for (expense of recentExpenses(); track expense.id) {
+              <li class="expense-item">
+                <div class="expense-main">
+                  <p class="expense-category">{{ expense.categoryName }}</p>
+                  <p class="expense-payment">{{ expense.paymentMethodName }} · {{ formatExpenseDate(expense.expenseDate) }}</p>
+                  @if (expense.note) {
+                    <p class="expense-note">{{ expense.note }}</p>
+                  }
+                </div>
+                <strong class="expense-amount">₹{{ expense.amount | number: '1.0-2' }}</strong>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    }
+  </section>
+
+  @if (!loading() && !errorMessage() && expenses().length) {
+    <button type="button" class="add-expense-action" (click)="goToAddExpense()" aria-label="Add expense">
+      <span aria-hidden="true">+</span>
+      Add Expense
+    </button>
+  }
+</main>
