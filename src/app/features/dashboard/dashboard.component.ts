@@ -113,6 +113,10 @@ export class DashboardComponent {
     await this.router.navigate(['/expenses/add']);
   }
 
+  async goToEditExpense(id: string): Promise<void> {
+    await this.router.navigate([`/expenses/${id}/edit`]);
+  }
+
   async signOut(): Promise<void> {
     await this.auth.signOut();
     await this.router.navigate(['/auth/login']);
