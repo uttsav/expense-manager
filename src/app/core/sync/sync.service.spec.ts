@@ -143,7 +143,7 @@ describe('SyncService', () => {
     expect(update).toHaveBeenCalledWith({
       ...expense,
       syncStatus: 'synced',
-    }, false);
+    }, false, true);
   });
 
   it('leaves an expense pending when its upsert fails', async () => {
@@ -172,7 +172,7 @@ describe('SyncService', () => {
     expect(update).toHaveBeenCalledWith({
       ...deleted,
       syncStatus: 'synced',
-    }, false);
+    }, false, true);
   });
 
   it('accepts remote newer update and does not upsert', async () => {
@@ -199,7 +199,7 @@ describe('SyncService', () => {
     await service.sync();
 
     expect(upsert).not.toHaveBeenCalled();
-    expect(update).toHaveBeenCalledWith(expect.any(Object), false);
+    expect(update).toHaveBeenCalledWith(expect.any(Object), false, true);
     const updatedArg = update.mock.calls[0][0];
     expect(updatedArg.categoryId).toBe('category-remote');
     expect(updatedArg.syncStatus).toBe('synced');
@@ -232,7 +232,7 @@ describe('SyncService', () => {
     expect(update).toHaveBeenCalledWith({
       ...expense,
       syncStatus: 'synced',
-    }, false);
+    }, false, true);
   });
 
   it('does not resurrect a remote deletion when remote is newer', async () => {
@@ -286,11 +286,17 @@ describe('SyncService', () => {
       },
     ];
 
+    getById.mockResolvedValue(undefined);
     add.mockResolvedValue(undefined);
     user.set({ id: expense.userId });
 
     await service.sync();
 
     expect(add).toHaveBeenCalled();
+    const added = add.mock.calls[0][0];
+    expect(added.id).toBe('remote-1');
+    expect(added.categoryId).toBe('category-1');
+    expect(added.paymentMethodId).toBe('pm-1');
+    expect(added.deletedAt).toBeUndefined();
   });
 });

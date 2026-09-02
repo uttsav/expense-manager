@@ -1,8 +1,9 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../core/auth/auth.service';
+import { ExpenseRepository } from '../../core/database/expense.repository';
 import { ExpenseService } from '../../core/expenses/expense.service';
 import { Category, CategoryService } from '../../core/family/category.service';
 import { FamilyService } from '../../core/family/family.service';
@@ -34,6 +35,7 @@ export class DashboardComponent {
   private readonly paymentMethodService = inject(PaymentMethodService);
   private readonly familyService = inject(FamilyService);
   private readonly router = inject(Router);
+  private readonly expenseRepository = inject(ExpenseRepository, { optional: true });
 
   private readonly today = this.getLocalDate(new Date());
   private readonly currentMonth = this.today.slice(0, 7);
@@ -66,16 +68,16 @@ export class DashboardComponent {
 
   protected readonly recentExpenses = computed<RecentExpense[]>(() => {
     const categoryNames = new Map(
-      this.categories().map((category) => [category.id, category.name]),
+      (this.categories() ?? []).map((category) => [category.id, category.name]),
     );
     const paymentMethodNames = new Map(
-      this.paymentMethods().map((paymentMethod) => [
+      (this.paymentMethods() ?? []).map((paymentMethod) => [
         paymentMethod.id,
         paymentMethod.name,
       ]),
     );
 
-    return [...this.expenses()]
+    return [...(this.expenses() ?? [])]
       .sort((first, second) =>
         second.expenseDate.localeCompare(first.expenseDate)
         || second.createdAt.localeCompare(first.createdAt),
@@ -102,6 +104,12 @@ export class DashboardComponent {
 
   constructor() {
     void this.loadExpenses();
+    // Reload when repository content changes (including remote pull updates)
+    effect(() => {
+      if (!this.expenseRepository) return;
+      this.expenseRepository.repoChanged();
+      void this.loadExpenses();
+    });
     void this.loadLookupNames();
   }
 

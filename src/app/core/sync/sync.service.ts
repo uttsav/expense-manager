@@ -101,7 +101,7 @@ export class SyncService {
               deletedAt: remote.deleted_at ?? undefined,
             };
 
-            await this.expenseRepository.update(mapped, false);
+            await this.expenseRepository.update(mapped, false, true);
             continue;
           }
 
@@ -145,7 +145,7 @@ export class SyncService {
               await this.expenseRepository.update({
                 ...expense,
                 syncStatus: 'synced',
-              }, false);
+              }, false, true);
               continue;
             }
 
@@ -153,7 +153,7 @@ export class SyncService {
             await this.expenseRepository.update({
               ...expense,
               syncStatus: 'synced',
-            }, false);
+            }, false, true);
             continue;
           }
 
@@ -174,7 +174,7 @@ export class SyncService {
               deletedAt: remote.deleted_at ?? undefined,
             };
 
-            await this.expenseRepository.update(mapped);
+            await this.expenseRepository.update(mapped, false, true);
             continue;
           }
 
@@ -202,7 +202,7 @@ export class SyncService {
           await this.expenseRepository.update({
             ...expense,
             syncStatus: 'synced',
-          }, false);
+          }, false, true);
         } catch (error) {
           console.error(
             'Expense synchronization failed',
@@ -264,12 +264,12 @@ export class SyncService {
           };
 
           if (!local) {
-            await this.expenseRepository.add(mapped);
+            await this.expenseRepository.add(mapped, false, true);
             continue;
           }
 
           if (local.updatedAt < remote.updated_at) {
-            await this.expenseRepository.update(mapped);
+            await this.expenseRepository.update(mapped, false, true);
           }
           // else local is newer; keep local
         } catch (err) {

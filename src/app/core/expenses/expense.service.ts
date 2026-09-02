@@ -4,6 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { ExpenseRepository } from '../database/expense.repository';
 import { FamilyService } from '../family/family.service';
 import { Expense } from '../../shared/models/expense.model';
+import { generateUUID } from '../utils/uuid';
 
 export interface ExpenseInput {
   categoryId: string;
@@ -42,7 +43,7 @@ export class ExpenseService {
 
     const now = new Date().toISOString();
     const expense: Expense = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       familyId,
       userId: user.id,
       categoryId: input.categoryId,

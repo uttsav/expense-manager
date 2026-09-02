@@ -8,6 +8,7 @@ import { CategoryService } from '../../core/family/category.service';
 import { FamilyService } from '../../core/family/family.service';
 import { PaymentMethodService } from '../../core/family/payment-method.service';
 import { Expense } from '../../shared/models/expense.model';
+import { ExpenseRepository } from '../../core/database/expense.repository';
 import { DashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
@@ -44,6 +45,8 @@ describe('DashboardComponent', () => {
   }
 
   async function createComponent(): Promise<void> {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-09T12:00:00.000Z'));
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
@@ -78,7 +81,6 @@ describe('DashboardComponent', () => {
         },
       ],
     }).compileComponents();
-
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -87,26 +89,6 @@ describe('DashboardComponent', () => {
     await Promise.resolve();
     fixture.detectChanges();
   }
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2026, 8, 9, 12));
-    getExpenses.mockReset();
-    getCategories.mockReset();
-    getPaymentMethods.mockReset();
-    navigate.mockReset();
-    signOut.mockReset();
-    user.set({ email: 'sam@example.com' });
-    membership.set({ name: 'Sam', family_id: 'family-1' });
-    getCategories.mockResolvedValue([
-      { id: 'category-1', familyId: 'family-1', name: 'Baby Shopping', isActive: true, sortOrder: 1 },
-      { id: 'category-2', familyId: 'family-1', name: 'Shopping', isActive: true, sortOrder: 2 },
-    ]);
-    getPaymentMethods.mockResolvedValue([
-      { id: 'payment-method-1', familyId: 'family-1', name: 'UPI', isActive: true, sortOrder: 1 },
-    ]);
-    navigate.mockResolvedValue(true);
-  });
 
   afterEach(() => {
     vi.useRealTimers();
@@ -145,6 +127,13 @@ describe('DashboardComponent', () => {
       expense('newest', 40, '2026-09-09'),
       expense('middle', 20, '2026-09-07'),
     ]);
+    getCategories.mockResolvedValue([
+      { id: 'category-1', name: 'Shopping' },
+      { id: 'category-2', name: 'Baby Shopping' },
+    ]);
+    getPaymentMethods.mockResolvedValue([
+      { id: 'payment-method-1', name: 'UPI' },
+    ]);
     await createComponent();
 
     const items = Array.from(
@@ -152,9 +141,9 @@ describe('DashboardComponent', () => {
     ) as HTMLElement[];
 
     expect(items.map((item) => item.textContent)).toEqual([
-      expect.stringContaining('Baby Shopping'),
-      expect.stringContaining('Baby Shopping'),
       expect.stringContaining('Shopping'),
+      expect.stringContaining('Shopping'),
+      expect.stringContaining('Baby Shopping'),
     ]);
     expect(items[0].textContent).toContain('₹40');
     expect(items[0].textContent).toContain('UPI');
@@ -194,5 +183,67 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No expenses yet');
+  });
+
+  it('reloads when ExpenseRepository.repoChanged increments', async () => {
+    const repo = { repoChanged: signal(0) } as any;
+    // override TestBed to include repo
+    await TestBed.resetTestingModule();
+
+    await TestBed.configureTestingModule({
+      imports: [DashboardComponent],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: { user, signOut },
+        },
+        {
+          provide: ExpenseService,
+          useValue: { getExpenses },
+        },
+        {
+          provide: CategoryService,
+          useValue: { getCategories },
+        },
+        {
+          provide: PaymentMethodService,
+          useValue: { getPaymentMethods },
+        },
+        {
+          provide: FamilyService,
+          useValue: {
+            membership,
+            get familyId() {
+              return membership()?.family_id ?? null;
+            },
+          },
+        },
+        {
+          provide: Router,
+          useValue: { navigate },
+        },
+        {
+          provide: ExpenseRepository,
+          useValue: repo,
+        },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DashboardComponent);
+    component = fixture.componentInstance;
+
+    getExpenses.mockResolvedValue([]);
+
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    // initial call should have happened at least once
+    expect(getExpenses).toHaveBeenCalled();
+    const initial = getExpenses.mock.calls.length;
+
+    repo.repoChanged.set(1);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(getExpenses.mock.calls.length).toBeGreaterThan(initial);
   });
 });

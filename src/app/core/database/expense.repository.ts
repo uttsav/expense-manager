@@ -8,16 +8,25 @@ import { Expense } from '../../shared/models/expense.model';
 })
 export class ExpenseRepository {
   readonly savedExpenseCount = signal(0);
+  readonly repoChanged = signal(0);
 
-  async add(expense: Expense): Promise<void> {
+  async add(expense: Expense, notify = true, notifyUI = true): Promise<void> {
     await expenseDb.expenses.add(expense);
-    this.savedExpenseCount.update((count) => count + 1);
+    if (notify) {
+      this.savedExpenseCount.update((count) => count + 1);
+    }
+    if (notifyUI) {
+      this.repoChanged.update((c) => c + 1);
+    }
   }
 
-  async update(expense: Expense, notify = true): Promise<void> {
+  async update(expense: Expense, notify = true, notifyUI = true): Promise<void> {
     await expenseDb.expenses.put(expense);
     if (notify) {
       this.savedExpenseCount.update((count) => count + 1);
+    }
+    if (notifyUI) {
+      this.repoChanged.update((c) => c + 1);
     }
   }
 
