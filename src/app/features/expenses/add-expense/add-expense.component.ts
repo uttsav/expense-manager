@@ -80,6 +80,10 @@ export class AddExpenseComponent {
     return this.submitted() && !this.expenseDate();
   }
 
+  protected hasNoteError(): boolean {
+    return this.submitted() && !this.note().trim();
+  }
+
   async submit(): Promise<void> {
     if (this.saving()) {
       return;
@@ -94,9 +98,12 @@ export class AddExpenseComponent {
       || this.hasCategoryError()
       || this.hasPaymentMethodError()
       || this.hasExpenseDateError()
+      || this.hasNoteError()
     ) {
       return;
     }
+
+    const trimmedNote = this.note().trim();
 
     this.saving.set(true);
 
@@ -105,7 +112,7 @@ export class AddExpenseComponent {
         amount: this.amount()!,
         categoryId: this.categoryId(),
         paymentMethodId: this.paymentMethodId(),
-        note: this.note().trim() || undefined,
+        note: trimmedNote,
         expenseDate: this.expenseDate(),
       });
 

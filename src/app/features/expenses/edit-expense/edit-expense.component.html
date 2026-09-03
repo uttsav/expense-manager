@@ -132,7 +132,7 @@
       </div>
 
       <div class="field">
-        <label for="note">Note <span>(optional)</span></label>
+        <label for="note">What did you buy? <span>*</span></label>
         <textarea
           id="note"
           name="note"
@@ -141,7 +141,13 @@
           placeholder="What was this for?"
           [ngModel]="note()"
           (ngModelChange)="note.set($event)"
+          required
+          [attr.aria-invalid]="hasNoteError()"
+          aria-describedby="note-error"
         ></textarea>
+        @if (hasNoteError()) {
+          <p id="note-error" class="field-error">Please enter what you bought.</p>
+        }
       </div>
 
       @if (lookupError()) {

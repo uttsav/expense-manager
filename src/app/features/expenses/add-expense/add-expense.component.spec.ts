@@ -49,11 +49,13 @@ describe('AddExpenseComponent', () => {
       categoryId: { set(value: string): void };
       expenseDate: { set(value: string): void };
       paymentMethodId: { set(value: string): void };
+      note: { set(value: string): void };
     };
 
     form.amount.set(250);
     form.categoryId.set('category-1');
     form.paymentMethodId.set('payment-method-1');
+    form.note.set('Groceries  ');
     form.expenseDate.set('2026-09-02');
   }
 
@@ -98,6 +100,29 @@ describe('AddExpenseComponent', () => {
     );
   });
 
+  it('rejects a blank note and shows the required validation message', async () => {
+    await createComponent();
+    const form = component as unknown as {
+      amount: { set(value: number): void };
+      categoryId: { set(value: string): void };
+      paymentMethodId: { set(value: string): void };
+      expenseDate: { set(value: string): void };
+      note: { set(value: string): void };
+    };
+
+    form.amount.set(250);
+    form.categoryId.set('category-1');
+    form.paymentMethodId.set('payment-method-1');
+    form.note.set('   ');
+    form.expenseDate.set('2026-09-02');
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(addExpense).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Please enter what you bought.');
+  });
+
   it('saves a valid expense and navigates to the dashboard', async () => {
     addExpense.mockResolvedValue(undefined);
     await createComponent();
@@ -109,7 +134,7 @@ describe('AddExpenseComponent', () => {
       amount: 250,
       categoryId: 'category-1',
       paymentMethodId: 'payment-method-1',
-      note: undefined,
+      note: 'Groceries',
       expenseDate: '2026-09-02',
     });
     expect(navigate).toHaveBeenCalledWith(['/dashboard']);

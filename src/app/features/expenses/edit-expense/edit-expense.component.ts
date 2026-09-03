@@ -75,6 +75,10 @@ export class EditExpenseComponent {
     return this.submitted() && !this.expenseDate();
   }
 
+  protected hasNoteError(): boolean {
+    return this.submitted() && !this.note().trim();
+  }
+
   private async loadLookupNames(): Promise<void> {
     try {
       this.categories.set(await this.categoryService.getCategories());
@@ -128,8 +132,10 @@ export class EditExpenseComponent {
       this.hasAmountError() ||
       this.hasCategoryError() ||
       this.hasPaymentMethodError() ||
-      this.hasExpenseDateError()
+      this.hasExpenseDateError() ||
+      this.hasNoteError()
     ) {
+      this.saveError.set('Please enter what you bought.');
       return;
     }
 
@@ -138,6 +144,8 @@ export class EditExpenseComponent {
       return;
     }
 
+    const trimmedNote = this.note().trim();
+
     this.saving.set(true);
 
     try {
@@ -145,7 +153,7 @@ export class EditExpenseComponent {
         amount: this.amount()!,
         categoryId: this.categoryId(),
         paymentMethodId: this.paymentMethodId(),
-        note: this.note().trim() || undefined,
+        note: trimmedNote,
         expenseDate: this.expenseDate(),
       });
 

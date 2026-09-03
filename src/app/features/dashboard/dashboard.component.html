@@ -69,7 +69,7 @@
             @for (expense of recentExpenses(); track expense.id) {
               <li class="expense-item" (click)="goToEditExpense(expense.id)" role="button" tabindex="0">
                 <div class="expense-main">
-                  <p class="expense-category">{{ expense.categoryName }}</p>
+                  <p class="expense-category">{{ expense.note }} : {{ expense.categoryName }}</p>
                   <p class="expense-payment">{{ expense.paymentMethodName }} · {{ formatExpenseDate(expense.expenseDate) }}</p>
                   @if (expense.note) {
                     <p class="expense-note">{{ expense.note }}</p>

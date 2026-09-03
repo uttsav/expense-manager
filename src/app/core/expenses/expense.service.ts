@@ -13,7 +13,7 @@ export interface ExpenseInput {
 
   amount: number;
 
-  note?: string;
+  note: string;
 
   expenseDate: string;
 }

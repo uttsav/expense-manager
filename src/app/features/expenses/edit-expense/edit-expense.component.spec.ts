@@ -75,13 +75,13 @@ describe('EditExpenseComponent', () => {
     expect(comp.expenseDate()).toBe('2026-09-02');
   });
 
-  it('saves edited expense and navigates to dashboard', async () => {
+  it('keeps existing notes and trims/validates before saving', async () => {
     getExpenseById.mockResolvedValue({
       id: 'expense-1',
       amount: 50,
       categoryId: 'cat-1',
       paymentMethodId: 'pm-1',
-      note: '',
+      note: 'Existing note',
       expenseDate: '2026-09-02',
     });
     getCategories.mockResolvedValue([]);
@@ -91,12 +91,43 @@ describe('EditExpenseComponent', () => {
     const comp = TestBed.inject(EditExpenseComponent);
     await new Promise((r) => setTimeout(r, 0));
 
+    expect(comp.note()).toBe('Existing note');
+
     comp.amount.set(75);
+    comp.note.set('  Milk and bread  ');
 
     await comp.submit();
 
-    expect(updateExpense).toHaveBeenCalled();
+    expect(updateExpense).toHaveBeenCalledWith('expense-1', {
+      amount: 75,
+      categoryId: 'cat-1',
+      paymentMethodId: 'pm-1',
+      note: 'Milk and bread',
+      expenseDate: '2026-09-02',
+    });
     expect(routerNavigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+
+  it('rejects a blank note when saving an edited expense', async () => {
+    getExpenseById.mockResolvedValue({
+      id: 'expense-1',
+      amount: 50,
+      categoryId: 'cat-1',
+      paymentMethodId: 'pm-1',
+      note: 'Existing note',
+      expenseDate: '2026-09-02',
+    });
+    getCategories.mockResolvedValue([]);
+    getPaymentMethods.mockResolvedValue([]);
+
+    const comp = TestBed.inject(EditExpenseComponent);
+    await new Promise((r) => setTimeout(r, 0));
+
+    comp.note.set('   ');
+    await comp.submit();
+
+    expect(updateExpense).not.toHaveBeenCalled();
+    expect(comp.saveError()).toBe('Please enter what you bought.');
   });
 
   it('delete confirms and calls deleteExpense', async () => {
